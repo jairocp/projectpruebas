@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-import pycurl
+
 import urllib,urllib2,cookielib,httplib2
 import attack
 from bs4 import BeautifulSoup
