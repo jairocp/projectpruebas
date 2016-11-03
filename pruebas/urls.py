@@ -29,6 +29,6 @@ urlpatterns = [
     url(r'pivoting/info/$',views.infopivoting),
     url(r'^links/$',views.vistalinkscaidos),
     url(r'^server/info/$', views.infoserver),
-    (r'^$', views.vistaxss),
+    url(r'^$', views.vistaxss),
 
 ]
