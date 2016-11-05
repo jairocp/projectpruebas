@@ -214,7 +214,7 @@ def vistalinkscaidos(request):
 			resultados=linksconse(urlsesion,url,user,password)
 
 		request.session["afectacion"]=resultados.get('afectacion')
-		del resultados['afectacion']
+		
 	
 		if len(resultados)>0:
 			creado="is vulnerable"
