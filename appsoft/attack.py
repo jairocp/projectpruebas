@@ -68,9 +68,11 @@ def  linkscaidossin(url):
 
 		con=con+1
 
-	total=(float(error)/float(con))*float(100) 
+	total2=(float(error)/float(con))*float(100) 
 	
-	total2=float(100)-total
+	if error==100:
+		total2=0
+		
 	resultlinks["afectacion"]=total2
 
 	print "afeto en "+ str(total2)

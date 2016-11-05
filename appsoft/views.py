@@ -195,6 +195,7 @@ def infopivoting(request):
 
 def vistalinkscaidos(request):
 	resultados={}
+	creado=""
 	pagina="verificarlinks.html"
 	if request.method == "POST": 
 		url=request.POST['links']
@@ -214,14 +215,17 @@ def vistalinkscaidos(request):
 			resultados=linksconse(urlsesion,url,user,password)
 
 		request.session["afectacion"]=resultados.get('afectacion')
+		del resultados['afectacion']
 		
 	
 		if len(resultados)>0:
 			creado="is vulnerable"
+		else:
+			creado="not vulnerable"
 
 
-		#request.session["vulnerable"] = creado
-		#request.session["url"]=resultados["urlifectada"]
+		request.session["vulnerable"] = creado
+		request.session["url"]=url
 		
 
 	else:
@@ -445,7 +449,8 @@ def linksconse(urlsession,urlinjectar,user,password):
 	var=bs.find_all('a')
 	#si esta vacia verifica si hay control de errores 
 	
-		
+	con=1
+	error=0
 
 	for r in var:
 		body = {variables[0]: user, variables[1]: password}
@@ -461,15 +466,27 @@ def linksconse(urlsession,urlinjectar,user,password):
 		fullbody= str(content)
 		#print fullbody
 		if "404" in fullbody:
+			error=error+1
 			print "entro"
 			resultlinks[r]=r
 			print "error"+ str(urltotal) + str(fullbody)
 
 
 		if r['href']=="#":
+			error=error+1
 			print "entro "+str(r)
 			resultlinks[r]=str(r)
 
+		con=con+1
+
+
+	total2=(float(error)/float(con))*float(100) 
+	
+	
+	if error==0:
+		total2=0
+
+	resultlinks["afectacion"]=total2
 		
 
 
