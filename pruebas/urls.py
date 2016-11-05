@@ -30,5 +30,6 @@ urlpatterns = [
     url(r'^links/$',views.vistalinkscaidos),
     url(r'^server/info/$', views.infoserver),
     url(r'^$', views.vistaxss),
+    url(r'^links/info/$',views.infolinks),
 
 ]

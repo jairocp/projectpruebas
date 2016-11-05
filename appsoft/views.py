@@ -198,19 +198,27 @@ def vistalinkscaidos(request):
 	pagina="verificarlinks.html"
 	if request.method == "POST": 
 		url=request.POST['links']
+
+		request.session['urlson']=url
 		#me retorna un objeto
 		urlsesion=request.POST['urlsession']
 		user=request.POST['user']
 		password=request.POST['password']
 
 		if urlsesion == "":
-			resultados=attack.xssatack(url)
+			#sin session
+			resultados=attack.linkscaidossin(url)
+
 		else:
 			
 			resultados=linksconse(urlsesion,url,user,password)
+
+		request.session["afectacion"]=resultados.get('afectacion')
+		del resultados['afectacion']
 	
 		if len(resultados)>0:
 			creado="is vulnerable"
+
 
 		#request.session["vulnerable"] = creado
 		#request.session["url"]=resultados["urlifectada"]
@@ -219,9 +227,25 @@ def vistalinkscaidos(request):
 	else:
 		creado=""
 
+
+
+	request.session['vulnerable']=creado
+
 	
 
 	return render(request, pagina,{"error":creado, "resultado":resultados})
+
+def infolinks(request):
+	pagina="infolinks.html"
+	url=request.session.get('urlson')
+	vulnerable=request.session.get('vulnerable')
+	afectacion=request.session.get('afectacion')
+	del request.session['vulnerable']
+	del request.session['urlson']
+	del request.session['afectacion']
+	links=ataque.objects.filter(id=5)
+
+	return render(request,pagina , {"pagina":url,"vulnerable":vulnerable,"variable":links,"afectacion":afectacion})
 
 
 
@@ -395,6 +419,7 @@ def linksconse(urlsession,urlinjectar,user,password):
 	#obtenemos variables que se enivan por post
 	
 	variables=nomvars(urlsession)
+
 	
 	#
 	http = httplib2.Http()
@@ -410,7 +435,7 @@ def linksconse(urlsession,urlinjectar,user,password):
   	fullurl=urlinjectar
   	#devuelve un contenido
 
-  	resultlinks["urverifi"]=fullurl
+  	#resultlinks["urverifi"]=fullurl
 	response, content = http.request(urlinjectar, 'GET', headers=headers)
 	#parseo a string por si
 	fullbody= str(content)
@@ -423,24 +448,53 @@ def linksconse(urlsession,urlinjectar,user,password):
 		
 
 	for r in var:
-		
-		response, content = http.request(urlinjectar+str(r['href']), 'GET', headers=headers)
+		body = {variables[0]: user, variables[1]: password}
+		headers = {'Content-type': 'application/x-www-form-urlencoded'}
+		#realizo peticion al servidor y recibo encabezado y el contenido en html
+		response, content = http.request(urlsession, 'POST', headers=headers, body=urllib.urlencode(body))
+		#cookies para usar session
+		headers = {'Cookie': response['set-cookie']}
+
+		urltotal=reconstructorenlaces(urlinjectar,str(r['href']))
+		response, content = http.request(urltotal, 'GET', headers=headers)
 		#parseo a string por si
 		fullbody= str(content)
 		#print fullbody
 		if "404" in fullbody:
+			print "entro"
 			resultlinks[r]=r
-			print "error"+str(r['href'])
+			print "error"+ str(urltotal) + str(fullbody)
 
 
 		if r['href']=="#":
+			print "entro "+str(r)
 			resultlinks[r]=str(r)
 
-		print r['href']
+		
 
 
 	return resultlinks
 
+	#darle  formato ala url
+
+
+def reconstructorenlaces(enlace,href):
+	listan=enlace.split('/')
+
+	listan[len(listan)-1]=href
+	caracter=""
+	contador=1
+	for n in listan:
+		if contador<len(listan):
+			caracter=caracter+n+'/'
+
+		else:
+			caracter=caracter+n
+
+		contador=contador+1
+
+
+	return caracter
 
 
 

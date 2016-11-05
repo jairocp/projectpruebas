@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import urllib
 import socket
 
+
 resultxss={}
 def xssatack(url):
 	param='<marquee>Hack</marquee>' #paramatro para probar
@@ -28,7 +29,74 @@ def xssatack(url):
 			resultxss["vulnerable"]="not vulnerable"
 
 
+
+
+
 	return resultxss
+
+resultlinks={}
+def  linkscaidossin(url):
+	fullurl=url
+	content=urllib.urlopen(fullurl).read() #genera un contenido con todo el html
+	fullbody= str(content)
+	#obtener la instanaci de beatifull con el hmtl devuelto y parseado
+	bs=BeautifulSoup(fullbody,'html.parser')
+	#busqueda de lo que se injecto
+	var=bs.find_all('a')
+	con=1
+	error=0
+
+	for r in var:
+
+		fullurl=reconstructorenlaces(url,str(r.get('href')))
+		content=urllib.urlopen(fullurl).read() #genera un contenido con todo el html
+		fullbody=BeautifulSoup(content,'html.parser')
+		
+		#print fullbody
+		if "404" in fullbody:
+			print "entro"
+			resultlinks[r]=r
+			print "error"+ str(urltotal) + str(fullbody)
+			error=error+1
+
+
+
+		if r.get('href')=="#":
+			print "entro "+str(r)
+			resultlinks[r]=str(r)
+			error=error+1
+
+		con=con+1
+
+	total=(float(error)/float(con))*float(100) 
+	
+	total2=float(100)-total
+	resultlinks["afectacion"]=total2
+
+	print "afeto en "+ str(total2)
+
+	return resultlinks
+
+
+
+def reconstructorenlaces(enlace,href):
+	listan=enlace.split('/')
+
+	listan[len(listan)-1]=href
+	caracter=""
+	contador=1
+	for n in listan:
+		if contador<len(listan):
+			caracter=caracter+n+'/'
+
+		else:
+			caracter=caracter+n
+
+		contador=contador+1
+
+
+	return caracter
+
 
 #diccionario
 result={}
